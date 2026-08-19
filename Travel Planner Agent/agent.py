@@ -246,8 +246,14 @@ def _make_llm_event_handler(collector: AuditCollector):
         cost = None
         if prompt_tokens is not None and completion_tokens is not None:
             try:
-                from pricing import MODEL_PRICING
                 model = getattr(event, "model", None) or "gpt-4o-mini"
+                # Hardcoded fallback pricing instead of importing from missing pricing.py
+                MODEL_PRICING = {
+                    "gpt-4o-mini": {"input": 0.15, "output": 0.60},
+                    "gpt-4o": {"input": 5.0, "output": 15.0},
+                    "gpt-4": {"input": 30.0, "output": 60.0},
+                    "gpt-3.5-turbo": {"input": 0.50, "output": 1.50},
+                }
                 pricing = MODEL_PRICING.get(model, {"input": 0.50, "output": 1.50})
                 cost = round(
                     prompt_tokens / 1_000_000 * pricing["input"]
@@ -488,7 +494,7 @@ def main() -> None:
     parser.add_argument("--interests",   default="food, culture, history", help="Traveller interests")
     args = parser.parse_args()
 
-    print(f"\nPlanning {args.days}-day trip from {args.from_city} to {args.destination} (Budget: ₹{args.budget:,.0f})\n")
+    print(f"\nPlanning {args.days}-day trip from {args.from_city} to {args.destination} (Budget: INR {args.budget:,.0f})\n")
 
     collector = AuditCollector()
     itinerary = build_travel_crew(
