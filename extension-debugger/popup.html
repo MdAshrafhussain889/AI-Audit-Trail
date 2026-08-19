@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Audit Trail</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>AI Audit Trail</h1>
+        <p class="subtitle">Shadow Detector (Debugger)</p>
+      </div>
+
+      <div id="status-line" class="status-line">
+        <span class="dot"></span>
+        <span>Detector: Active</span>
+      </div>
+
+      <div id="auth-section"></div>
+
+      <!-- Backend Configuration removed from popup UI. Use default (http://localhost:8000) or change via chrome.storage.local manually. -->
+
+      <div class="footer">
+        <p class="text-xs text-gray-500">Monitoring: Copilot, GitHub Copilot, Claude</p>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
