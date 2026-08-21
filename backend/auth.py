@@ -6,6 +6,7 @@ from typing import Optional
 from fastapi import HTTPException, Header, Depends
 from passlib.context import CryptContext
 from pydantic import BaseModel, Field
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from models import User, AuthSession, SessionLocal
@@ -79,7 +80,11 @@ def seed_demo_users(db: Session) -> None:
                     role=role,
                 )
             )
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        # Another gunicorn worker seeded the same demo users concurrently — safe to skip.
+        db.rollback()
 
 
 def _store_token(db: Session, user_id: str) -> str:

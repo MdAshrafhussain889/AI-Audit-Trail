@@ -5,7 +5,7 @@ import { useAuth } from './AuthContext'
 import { API_BASE_URL } from './config'
 import {
   Bot, Wrench, Brain, ChevronDown, RefreshCw, Layers,
-  Search, Download, AlertTriangle, ChevronRight,
+  Search, Download, ChevronRight,
 } from 'lucide-react'
 
 type AgentAuditEvent = {
@@ -61,7 +61,6 @@ export function AgentAudit() {
   const [error, setError] = useState('')
   const [filterType, setFilterType] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
-  const [expandedId, setExpandedId] = useState<string | null>(null)
   const [expandedRuns, setExpandedRuns] = useState<Set<string>>(new Set())
   const [offset, setOffset] = useState(0)
   const [hasMore, setHasMore] = useState(true)

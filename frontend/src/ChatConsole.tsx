@@ -5,8 +5,8 @@ import remarkGfm from 'remark-gfm'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Sparkles, Send, Loader2, CheckCircle2, FileText,
-  Plus, MessageSquare, Trash2, Copy, RefreshCw,
-  ChevronDown, ArrowDown, StopCircle, AlertTriangle,
+  Plus, MessageSquare, Trash2, Copy,
+  ArrowDown, StopCircle, AlertTriangle,
   RotateCcw, User, Bot, PanelLeftClose, PanelLeft,
 } from 'lucide-react'
 import { useAuth } from './AuthContext'
@@ -280,16 +280,6 @@ export function ChatConsole() {
   }, [input, isLoading, activeConvId, token, createConversation, saveMessage, loadConversations])
 
   const handleStop = () => { abortRef.current?.abort() }
-
-  const handleRegenerate = useCallback(async () => {
-    const lastUserMsg = [...messages].reverse().find((m) => m.type === 'user')
-    if (!lastUserMsg || isLoading) return
-    setMessages((prev) => {
-      const lastAiIdx = prev.findLastIndex((m) => m.type === 'ai')
-      return lastAiIdx >= 0 ? prev.slice(0, lastAiIdx) : prev
-    })
-    await handleSendMessage(lastUserMsg.text)
-  }, [messages, isLoading, handleSendMessage])
 
   const handleCopy = (text: string, id: string) => {
     navigator.clipboard.writeText(text)

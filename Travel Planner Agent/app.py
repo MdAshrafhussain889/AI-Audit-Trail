@@ -1,4 +1,16 @@
+import os
+
 import streamlit as st
+
+# Streamlit Cloud exposes secrets only via st.secrets, not as environment variables.
+# Sync them into os.environ BEFORE importing agent, which reads config at module load
+# (and CrewAI/LangChain also read OPENAI_API_KEY from the process environment).
+try:
+    for _key, _value in st.secrets.items():
+        os.environ.setdefault(_key, str(_value))
+except Exception:
+    pass  # Local development uses backend-style .env loaded inside agent.py
+
 from agent import build_travel_crew, AuditCollector
 
 st.set_page_config(page_title="Travel Planner", page_icon=None, layout="wide")

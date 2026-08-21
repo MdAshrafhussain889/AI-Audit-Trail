@@ -25,7 +25,8 @@ if DATABASE_URL.startswith("postgresql://") and "+pg8000" not in DATABASE_URL an
 if DATABASE_URL.startswith("sqlite"):
     engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 else:
-    engine = create_engine(DATABASE_URL)
+    # pool_pre_ping recycles connections dropped by managed Postgres (e.g. Supabase pooler) after idle periods
+    engine = create_engine(DATABASE_URL, pool_pre_ping=True, pool_size=5, max_overflow=5)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
