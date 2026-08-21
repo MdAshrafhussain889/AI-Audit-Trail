@@ -123,15 +123,42 @@ h1, h2, h3, .hero-title { font-family: 'Sora', 'Inter', sans-serif; letter-spaci
 .stButton > button:focus:not(:active) { color: #04121F; box-shadow: 0 12px 32px rgba(34,211,238,0.25); }
 .stButton > button:active { transform: translateY(0); }
 
-/* Inputs */
-.stTextInput input, .stNumberInput input {
-  background: var(--glass) !important;
-  border: 1px solid var(--line) !important;
+/* Inputs — dark navy to match theme */
+.stTextInput input,
+.stNumberInput input,
+div[data-baseweb="input"],
+div[data-baseweb="input"] input {
+  background: #162A40 !important;
+  border: 1px solid #2A4660 !important;
   border-radius: 10px !important;
-  color: var(--text) !important;
+  color: #E2E8F0 !important;
+  caret-color: #E2E8F0;
 }
-.stTextInput input::placeholder { color: rgba(148, 163, 184, 0.65) !important; }
-.stTextInput input:focus, .stNumberInput input:focus {
+.stTextInput input::placeholder,
+div[data-baseweb="input"] input::placeholder {
+  color: #8FA9BF !important;
+  opacity: 1 !important;
+}
+.stTextInput input:-webkit-autofill,
+div[data-baseweb="input"] input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #162A40 inset !important;
+  -webkit-text-fill-color: #E2E8F0 !important;
+  transition: background-color 9999s ease-in-out 0s;
+}
+.stNumberInput button[data-testid="stNumberInputStepUp"],
+.stNumberInput button[data-testid="stNumberInputStepDown"] {
+  background: #162A40 !important;
+  border-color: #2A4660 !important;
+  color: #8FA9BF !important;
+}
+.stNumberInput button[data-testid="stNumberInputStepUp"]:hover,
+.stNumberInput button[data-testid="stNumberInputStepDown"]:hover {
+  color: #22D3EE !important;
+  background: #1C3450 !important;
+}
+.stTextInput input:focus,
+.stNumberInput input:focus,
+div[data-baseweb="input"]:focus-within {
   border-color: rgba(34, 211, 238, 0.65) !important;
   box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15) !important;
 }
