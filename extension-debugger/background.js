@@ -19,11 +19,13 @@ const DIAG = { wsCreated: 0, sent: 0, recv: 0, inputs: 0, captures: 0, lastPrevi
 let lastCaptureAt = 0;
 let lastError = '';
 
-// Get backend URL from chrome storage or default to localhost
+// Get backend URL from chrome storage or default to the deployed backend
+const DEFAULT_BACKEND_URL = 'https://ai-audit-trail.onrender.com';
+
 async function getBackendUrl() {
   return new Promise((resolve) => {
     chrome.storage.local.get('backendUrl', (result) => {
-      resolve(result.backendUrl || 'http://localhost:8000');
+      resolve(result.backendUrl || DEFAULT_BACKEND_URL);
     });
   });
 }

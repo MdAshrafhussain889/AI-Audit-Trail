@@ -1,0 +1,22 @@
+AI Audit Trail - Shadow Detector Extension (v0.3.0)
+====================================================
+
+INSTALLATION
+1. Unzip this folder anywhere on your computer.
+2. Open Chrome and go to:  chrome://extensions
+3. Turn ON "Developer mode" (toggle in the top-right corner).
+4. Click "Load unpacked" and select this folder.
+5. Click the extension icon in the Chrome toolbar.
+
+SIGN IN
+Use the account provided by your administrator, e.g.
+    username: alice
+    password: demo123
+
+When the popup shows "Detector: Active", the extension is logging AI usage
+(ChatGPT, Copilot, Gemini) to your organization's audit trail automatically.
+
+NOTES
+- No configuration required; it connects to the deployed backend by default.
+- Works only in Google Chrome / Chromium-based browsers.
+- This is a proof-of-concept tool for demonstration purposes.

@@ -67,10 +67,10 @@ async function handleLogin(username, password) {
   }
 
   try {
-    // Get backend URL from storage or default to localhost
+    // Get backend URL from storage or default to the deployed backend
     const backendUrl = await new Promise((resolve) => {
       chrome.storage.local.get('backendUrl', (result) => {
-        resolve(result.backendUrl || 'http://localhost:8000');
+        resolve(result.backendUrl || 'https://ai-audit-trail.onrender.com');
       });
     });
 

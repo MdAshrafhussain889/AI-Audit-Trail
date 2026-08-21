@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "AI Audit Trail - Shadow Detector (Debugger)",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Logs shadow AI usage (ChatGPT, Copilot) via Chrome DevTools Protocol",
   "permissions": ["tabs", "storage", "debugger"],
   "host_permissions": [

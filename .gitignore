@@ -76,3 +76,6 @@ extension-debugger/*.pem
 
 # Old folder name with space (pre-Streamlit-Cloud rename); physical folder pending manual delete
 "Travel Planner Agent/"
+
+# Built client distribution zip
+ai-audit-trail-extension-*.zip
