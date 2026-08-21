@@ -509,7 +509,8 @@ def main() -> None:
     print("=" * 60)
     print("TRAVEL PLAN")
     print("=" * 60)
-    print(itinerary)
+    safe = itinerary.encode("ascii", errors="replace").decode("ascii")
+    print(safe)
 
 
 if __name__ == "__main__":
