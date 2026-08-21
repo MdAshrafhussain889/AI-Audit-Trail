@@ -36,7 +36,7 @@ LegalBot/
 ├── backend/               # FastAPI server (Python)
 ├── frontend/              # React + TypeScript + Vite web app
 ├── extension-debugger/    # Chrome Manifest V3 shadow AI detector (debugger build)
-├── Travel Planner Agent/  # Streamlit App + CrewAI Agent with Audit Integration
+├── travel_planner_agent/  # Streamlit App + CrewAI Agent with Audit Integration
 └── README.md
 ```
 
@@ -394,7 +394,7 @@ extension-debugger/
 ├── styles.css              # Popup styling
 └── icon16/48/128.png       # Extension icons
 
-Travel Planner Agent/
+travel_planner_agent/
 ├── agent.py                # Core CrewAI logic (Agents, Tasks, Tools, AuditCollector)
 ├── app.py                  # Streamlit web UI
 ├── metadata.yaml           # Agent metadata configuration
