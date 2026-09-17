@@ -60,6 +60,11 @@ class AuditLogEntry(Base):
     output_text = Column(Text, nullable=False)
     downstream_action = Column(String, nullable=False)
     parent_response_id = Column(String, nullable=True)
+    session_id = Column(String, nullable=True, index=True)
+    session_type = Column(String, nullable=True)
+    duration_ms = Column(Integer, nullable=True)
+    exit_code = Column(Integer, nullable=True)
+    hostname = Column(String, nullable=True)
     prompt_tokens = Column(Integer, nullable=True)
     completion_tokens = Column(Integer, nullable=True)
     cost_per_response = Column(Float, nullable=True)
@@ -124,6 +129,16 @@ def _migrate_old_schema():
             conn.execute(text("ALTER TABLE audit_log_entries RENAME COLUMN parent_decision_id TO parent_response_id"))
         if "cost_per_response" not in columns:
             conn.execute(text("ALTER TABLE audit_log_entries ADD COLUMN cost_per_response DOUBLE PRECISION"))
+        if "session_id" not in columns:
+            conn.execute(text("ALTER TABLE audit_log_entries ADD COLUMN session_id VARCHAR"))
+        if "session_type" not in columns:
+            conn.execute(text("ALTER TABLE audit_log_entries ADD COLUMN session_type VARCHAR"))
+        if "duration_ms" not in columns:
+            conn.execute(text("ALTER TABLE audit_log_entries ADD COLUMN duration_ms INTEGER"))
+        if "exit_code" not in columns:
+            conn.execute(text("ALTER TABLE audit_log_entries ADD COLUMN exit_code INTEGER"))
+        if "hostname" not in columns:
+            conn.execute(text("ALTER TABLE audit_log_entries ADD COLUMN hostname VARCHAR"))
         conn.commit()
 
     # Agent audit event schema migration

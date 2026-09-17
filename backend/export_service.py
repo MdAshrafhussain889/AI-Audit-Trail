@@ -12,11 +12,17 @@ def filter_entries(
     source_type: Optional[str] = None,
     from_date: Optional[str] = None,
     to_date: Optional[str] = None,
+    exclude_source_types: Optional[str] = None,
 ) -> List[AuditLogEntry]:
     query = db.query(AuditLogEntry).order_by(AuditLogEntry.id.desc())
 
     if source_type:
         query = query.filter(AuditLogEntry.source_type == source_type)
+
+    if exclude_source_types:
+        excluded = [t.strip() for t in exclude_source_types.split(",") if t.strip()]
+        if excluded:
+            query = query.filter(~AuditLogEntry.source_type.in_(excluded))
 
     if from_date:
         query = query.filter(AuditLogEntry.timestamp_utc >= from_date)

@@ -8,7 +8,7 @@ from collections import defaultdict
 from dotenv import load_dotenv
 from fastapi import FastAPI, Depends, HTTPException, Header
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import HTMLResponse, StreamingResponse
 import io
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
@@ -36,6 +36,22 @@ load_dotenv(override=True)
 app = FastAPI(title="AI Audit Trail POC")
 
 import os
+
+_BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
+@app.get("/privacy", response_class=HTMLResponse)
+def privacy_policy():
+    """Serve the hosted privacy policy required by the Chrome Web Store."""
+    path = os.path.join(_BASE_DIR, "privacy_policy.html")
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    except FileNotFoundError:
+        return HTMLResponse(
+            content="<h1>Privacy Policy</h1><p>Policy not yet published.</p>",
+            status_code=404,
+        )
 
 allowed_origins_env = os.getenv("ALLOWED_ORIGINS")
 if allowed_origins_env:
@@ -89,6 +105,11 @@ class AuditLogResponse(BaseModel):
     output_text: str
     downstream_action: str
     parent_response_id: Optional[str]
+    session_id: Optional[str] = None
+    session_type: Optional[str] = None
+    duration_ms: Optional[int] = None
+    exit_code: Optional[int] = None
+    hostname: Optional[str] = None
     cost_per_response: Optional[float] = None
     prev_hash: str
     entry_hash: str
@@ -158,14 +179,27 @@ class DetectorEventRequest(BaseModel):
     model_config = ConfigDict(protected_namespaces=())
     domain: str
     matched_ai_system: str
-    tab_title: str
     timestamp_client: str
+    tab_title: Optional[str] = None
     user_id: Optional[str] = None
     user_display_name: Optional[str] = None
     user_note: Optional[str] = None
     model_version: Optional[str] = None
     input_text: Optional[str] = None
     output_text: Optional[str] = None
+
+
+class CliEventRequest(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+    source_type: str = "claude_code_cli"
+    user_id: Optional[str] = None
+    user_display_name: Optional[str] = None
+    question: str
+    answer: str = ""
+    session_id: Optional[str] = None
+    session_type: str = "command"  # "command" | "interactive"
+    duration_ms: Optional[int] = None
+    hostname: Optional[str] = None
 
 
 class AgentAuditEventItem(BaseModel):
@@ -449,12 +483,30 @@ def create_audit_log(
 def list_audit_logs(
     limit: int = 10,
     offset: int = 0,
+    source_type: Optional[str] = None,
+    exclude_source_types: Optional[str] = None,
+    search: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: UserResponse = Depends(require_audit_access),
 ):
+    query = db.query(AuditLogEntry)
+    if source_type:
+        query = query.filter(AuditLogEntry.source_type == source_type)
+    if exclude_source_types:
+        excluded = [t.strip() for t in exclude_source_types.split(",") if t.strip()]
+        if excluded:
+            query = query.filter(~AuditLogEntry.source_type.in_(excluded))
+    if search:
+        like = f"%{search}%"
+        query = query.filter(
+            AuditLogEntry.input_text.ilike(like)
+            | AuditLogEntry.output_text.ilike(like)
+            | AuditLogEntry.user_display_name.ilike(like)
+            | AuditLogEntry.hostname.ilike(like)
+            | AuditLogEntry.session_id.ilike(like)
+        )
     entries = (
-        db.query(AuditLogEntry)
-        .order_by(AuditLogEntry.id.desc())
+        query.order_by(AuditLogEntry.id.desc())
         .limit(limit)
         .offset(offset)
         .all()
@@ -562,6 +614,7 @@ def get_audit_cost(
 def export_audit_logs(
     format: str = "json",
     source_type: Optional[str] = None,
+    exclude_source_types: Optional[str] = None,
     from_date: Optional[str] = None,
     to_date: Optional[str] = None,
     db: Session = Depends(get_db),
@@ -573,6 +626,7 @@ def export_audit_logs(
     entries = filter_entries(
         db=db,
         source_type=source_type,
+        exclude_source_types=exclude_source_types,
         from_date=from_date,
         to_date=to_date,
     )
@@ -736,6 +790,48 @@ def log_detector_event(
         db=db,
     )
 
+    return entry
+
+
+@app.post("/api/cli/events", response_model=AuditLogResponse)
+def log_cli_event(
+    request: CliEventRequest,
+    db: Session = Depends(get_db),
+):
+    """Log a terminal Claude Code interaction (one-shot or interactive session).
+
+    Identity comes from the payload (the wrapper resolves it from ~/.claude.json).
+    Entries ride the same immutable hash chain as every other audit record.
+    """
+    user_id = (request.user_id or "").strip() or "unknown"
+    user_display_name = (
+        (request.user_display_name or "").strip()
+        or (request.user_id or "").strip()
+        or "Unidentified CLI session"
+    )
+    question = (request.question or "").strip() or "(no question captured)"
+    answer = (request.answer or "").strip()
+    session_type = request.session_type or "command"
+    hostname = (request.hostname or "").strip() or "unknown-host"
+
+    entry = create_audit_log_entry(
+        source_type=request.source_type or "claude_code_cli",
+        user_id=user_id,
+        user_display_name=user_display_name,
+        ai_system=f"Claude Code ({session_type})",
+        model_version="claude (from wrapper)",
+        input_text=question,
+        input_source="terminal_cli",
+        policy_invoked="claude_code_usage_policy_v1",
+        reasoning_summary=(answer[:2000] if answer else "(no capture)"),
+        output_text=answer,
+        downstream_action=f"Claude Code session record ({session_type})",
+        session_id=request.session_id,
+        session_type=session_type,
+        duration_ms=request.duration_ms,
+        hostname=hostname,
+        db=db,
+    )
     return entry
 
 
